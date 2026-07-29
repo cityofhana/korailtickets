@@ -57,7 +57,7 @@ def main():
         st.session_state.data_loaded = True
 
     st.title("🚄 내 손안의 간편 기차 예매 도우미")
-    st.info("💡 브라우저 자동완성을 활용해 링크를 누르면 빠르게 로그인 및 예매를 진행할 수 있습니다.")
+    st.info("💡 아래 버튼을 누르면 승차권 예매 및 조회 페이지로 바로 이동합니다.")
 
     st.sidebar.title("🛠️ 메뉴")
     menu = st.sidebar.radio("선택", ["기차 예매 및 조회", "즐겨찾기 노선 관리"])
@@ -81,8 +81,8 @@ def main():
             ])
 
         st.markdown("---")
-        st.subheader("🌐 원클릭 공식 예매 페이지 이동")
-        st.write("버튼을 누르면 공식 예매 사이트로 이동합니다. (브라우저 자동완성 연동)")
+        st.subheader("🌐 승차권 예매 페이지 바로 이동")
+        st.write("메인이 아닌 **예매·조회 전용 페이지**로 연결됩니다.")
 
         col_a, col_b = st.columns(2)
         with col_a:
@@ -92,7 +92,8 @@ def main():
             * **도착역:** {arr_station}
             * **날짜:** {train_date} ({train_time})
             """, unsafe_allow_html=True)
-            st.markdown("[🔗 코레일 승차권 예매 바로가기](https://www.korail.com/ticket/main)", unsafe_allow_html=True)
+            # 코레일 승차권 예매/조회 직행 페이지
+            st.markdown("[🔗 코레일 승차권 예매 바로가기](https://www.letskorail.com/ebiz/wc/WCC310000.do)", unsafe_allow_html=True)
 
         with col_b:
             st.markdown(f"""
@@ -101,20 +102,8 @@ def main():
             * **도착역:** {arr_station}
             * **날짜:** {train_date} ({train_time})
             """, unsafe_allow_html=True)
-            st.markdown("[🔗 SRT 승차권 예매 바로가기](https://etk.srail.kr/main.do)", unsafe_allow_html=True)
-
-        # 즐겨찾기 빠른 연동 섹션 추가
-        if st.session_state.favorites:
-            st.markdown("---")
-            st.subheader("⭐ 내 즐겨찾기 노선으로 바로 예매하기")
-            for fav in st.session_state.favorites:
-                f_col1, f_col2, f_col3 = st.columns([2, 2, 1])
-                with f_col1:
-                    st.write(f"**{fav['name']}**")
-                with f_col2:
-                    st.write(f"{fav['dep']} ➔ {fav['arr']}")
-                with f_col3:
-                    st.markdown(f"[코레일 이동](https://www.korail.com/ticket/main)")
+            # SRT 승차권 조회/예약 직행 페이지
+            st.markdown("[🔗 SRT 승차권 예매 바로가기](https://etk.srail.kr/hpg/hra/01/selectScheduleList.do)", unsafe_allow_html=True)
 
     elif menu == "즐겨찾기 노선 관리":
         st.subheader("⭐ 자주 가는 노선 즐겨찾기")
