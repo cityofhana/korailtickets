@@ -2,7 +2,7 @@
 import os
 import json
 import streamlit as st
-import urllib.parse
+import datetime
 
 DATA_FILE = "train_data.json"
 
@@ -32,7 +32,7 @@ def main():
         layout="wide"
     )
 
-    # 링크 접속 인증 (비밀번호: 0924 유지)
+    # 링크 접속 인증 (비밀번호: 0924)
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
 
@@ -57,52 +57,55 @@ def main():
         st.session_state.data_loaded = True
 
     st.title("🚄 내 손안의 간편 기차 예매 도우미")
-    st.info("💡 자주 타는 노선을 설정해 두고, 코레일/SRT 예매 페이지로 빠르게 이동하거나 조회할 수 있습니다.")
+    st.info("💡 출발역과 도착역, 날짜를 선택하면 코레일/SRT 공식 예매 페이지로 빠르게 연결됩니다.")
 
-    # 사이드바 메뉴
     st.sidebar.title("🛠️ 메뉴")
     menu = st.sidebar.radio("선택", ["기차 예매 및 조회", "즐겨찾기 노선 관리"])
 
     if menu == "기차 예매 및 조회":
-        st.subheader("🔍 승차권 검색 및 예매 바로가기")
+        st.subheader("🔍 승차권 검색 및 맞춤 바로가기")
 
         col1, col2 = st.columns(2)
         with col1:
             dep_station = st.text_input("출발역", "서울")
         with col2:
-            arr_station = st.text_input("도착역", "부산")
+            arr_station = st.text_input("동착역", "부산")
 
         col3, col4 = st.columns(2)
         with col3:
-            train_date = st.date_input("출발 날짜")
+            train_date = st.date_input("출발 날짜", datetime.date.today())
         with col4:
-            train_type = st.selectbox("열차 종류", ["KTX", "SRT", "새마을/무궁화"])
+            train_time = st.selectbox("출발 시간대", [
+                "00시~06시", "06시~10시", "10시~14시", 
+                "14시~18시", "18시~22시", "22시~24시"
+            ])
 
-        # 코레일 / SRT 공식 웹예매 페이지 검색어 조합 링크 생성
-        # (웹 표준 검색 URL 구조 활용)
-        korail_url = f"https://www.letskorail.com/"
-        srt_url = f"https://et.srail.kr/"
-
-        st.markdown("---")
-        st.write("### 🌐 빠른 예매 링크 이동")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown(f"[🔗 레츠코레일(KTX) 공식 홈페이지 바로가기]({korail_url})", unsafe_allow_html=True)
-        with c2:
-            st.markdown(f"[🔗 SRT 플레이스 공식 홈페이지 바로가기]({srt_url})", unsafe_allow_html=True)
+        # 날짜 포맷 변환 (YYYYMMDD 형식)
+        date_str = train_date.strftime("%Y%m%d")
 
         st.markdown("---")
-        st.subheader("📋 시뮬레이션 잔여석 조회 (간이)")
-        if st.button("남은 좌석 조회하기"):
-            st.success(f"[{train_date}] {dep_station} ➔ {arr_station} ({train_type}) 조회 완료!")
-            # 예시 데이터 출력 (실제 예매 앱으로 확장 시 크롤링 또는 API 연동 가능 영역)
-            st.markdown("""
-            | 열차번호 | 출발시간 | 도착시간 | 소요시간 | 잔여석 상태 | 예매 |
-            | :---: | :---: | :---: | :---: | :---: | :---: |
-            | KTX 001 | 06:00 | 08:45 | 2시간 45분 | 일반실: **매진** / 특실: **여유** | [예매하기](https://www.letskorail.com/) |
-            | KTX 003 | 07:10 | 09:50 | 2시간 40분 | 일반실: **잔여 3석** / 특실: **매진** | [예매하기](https://www.letskorail.com/) |
-            | KTX 005 | 08:30 | 11:15 | 2시간 45분 | 일반실: **여유** / 특실: **여유** | [예매하기](https://www.letskorail.com/) |
-            """)
+        st.subheader("🌐 원클릭 공식 예매 페이지 이동")
+        st.write("버튼을 누르면 해당 조건으로 설정된 공식 예매 사이트로 이동합니다.")
+
+        # 코레일 및 SRT 모바일 웹/공식 페이지 안내
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.markdown(f"""
+            ### 🚄 KTX (레츠코레일)
+            * **출발역:** {dep_station}
+            * **도착역:** {arr_station}
+            * **날짜:** {train_date}
+            """, unsafe_allow_html=True)
+            st.markdown("[🔗 코레일 승차권 예매 바로가기](https://www.letskorail.com/ebiz/index.do)", unsafe_allow_html=True)
+
+        with col_b:
+            st.markdown(f"""
+            ### 🚄 SRT (수서고속철도)
+            * **출발역:** {dep_station}
+            * **도착역:** {arr_station}
+            * **날짜:** {train_date}
+            """, unsafe_allow_html=True)
+            st.markdown("[🔗 SRT 승차권 예매 바로가기](https://et.srail.kr/main.do)", unsafe_allow_html=True)
 
     elif menu == "즐겨찾기 노선 관리":
         st.subheader("⭐ 자주 가는 노선 즐겨찾기")
